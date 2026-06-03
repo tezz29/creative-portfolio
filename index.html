@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>TEZ — Creative Portfolio</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --black: #0a0a0a; --off-black: #111; --surface: #161616;
+    --border: rgba(255,255,255,0.08); --text: #f0ede6;
+    --muted: rgba(240,237,230,0.45); --accent: #d4a853; --accent2: #c05a3a;
+    --tag-bg: rgba(212,168,83,0.12);
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--black); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+  nav { position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 1.1rem 2.5rem; background: rgba(10,10,10,0.85); backdrop-filter: blur(12px); border-bottom: 0.5px solid var(--border); }
+  .nav-logo { font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; letter-spacing: 0.15em; color: var(--text); text-decoration: none; }
+  .nav-links { display: flex; gap: 2rem; }
+  .nav-links a { font-size: 0.78rem; font-weight: 400; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--text); }
+  .hero { min-height: 92vh; display: grid; grid-template-columns: 1fr 1fr; align-items: center; padding: 5rem 2.5rem 3rem; gap: 3rem; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 60% 60% at 80% 40%, rgba(192,90,58,0.07) 0%, transparent 70%), radial-gradient(ellipse 50% 50% at 20% 70%, rgba(212,168,83,0.05) 0%, transparent 60%); pointer-events: none; }
+  .hero-eyebrow { display: flex; align-items: center; gap: 0.75rem; font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); margin-bottom: 1.5rem; }
+  .hero-eyebrow::before { content: ''; width: 28px; height: 1px; background: var(--accent); }
+  .hero h1 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(4.5rem, 8vw, 7.5rem); line-height: 0.9; letter-spacing: 0.02em; color: var(--text); margin-bottom: 1.8rem; }
+  .hero h1 span { display: block; -webkit-text-stroke: 1.5px rgba(240,237,230,0.18); color: transparent; }
+  .hero-body { font-size: 1rem; font-weight: 300; line-height: 1.75; color: var(--muted); max-width: 380px; margin-bottom: 2.5rem; }
+  .hero-ctas { display: flex; gap: 1rem; flex-wrap: wrap; }
+  .btn-primary { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.85rem 1.8rem; background: var(--accent); color: #0a0a0a; font-family: 'DM Sans', sans-serif; font-size: 0.78rem; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; text-decoration: none; border: none; cursor: pointer; transition: background 0.2s, transform 0.15s; }
+  .btn-primary:hover { background: #e0b865; transform: translateY(-1px); }
+  .btn-ghost { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.85rem 1.8rem; border: 0.5px solid rgba(240,237,230,0.25); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.78rem; font-weight: 400; letter-spacing: 0.12em; text-transform: uppercase; text-decoration: none; transition: border-color 0.2s, transform 0.15s; }
+  .btn-ghost:hover { border-color: rgba(240,237,230,0.6); transform: translateY(-1px); }
+  .hero-visual { position: relative; height: 520px; display: flex; align-items: center; justify-content: center; }
+  .hero-reel-card { width: 100%; max-width: 420px; aspect-ratio: 9/12; background: var(--surface); border: 0.5px solid var(--border); position: relative; overflow: hidden; display: flex; align-items: flex-end; }
+  .hero-reel-card::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(10,10,10,0.9) 0%, rgba(10,10,10,0.1) 60%, transparent 100%); }
+  .hero-reel-placeholder { width: 100%; height: 100%; background: repeating-linear-gradient(45deg, rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.02) 1px, transparent 1px, transparent 12px); display: flex; align-items: center; justify-content: center; position: absolute; inset: 0; }
+  .hero-reel-placeholder-icon { width: 56px; height: 56px; border: 1px solid rgba(240,237,230,0.12); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: rgba(240,237,230,0.15); font-size: 1.5rem; }
+  .hero-reel-info { position: relative; z-index: 2; padding: 1.5rem; width: 100%; }
+  .hero-reel-tag { display: inline-block; font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); border: 0.5px solid rgba(212,168,83,0.3); padding: 0.3rem 0.65rem; margin-bottom: 0.6rem; }
+  .hero-reel-info p { font-size: 0.82rem; color: rgba(240,237,230,0.55); font-weight: 300; }
+  .hero-floats { position: absolute; top: 1.5rem; right: -1.5rem; display: flex; flex-direction: column; gap: 0.7rem; }
+  .hero-stat { background: rgba(22,22,22,0.95); border: 0.5px solid var(--border); padding: 0.7rem 1rem; text-align: right; backdrop-filter: blur(8px); min-width: 130px; }
+  .hero-stat-n { font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; color: var(--text); letter-spacing: 0.05em; display: block; }
+  .hero-stat-l { font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); }
+  section { padding: 5rem 2.5rem; }
+  .section-eyebrow { display: flex; align-items: center; gap: 0.75rem; font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.75rem; }
+  .section-eyebrow::before { content: ''; width: 20px; height: 1px; background: var(--accent); }
+  .section-title { font-family: 'Bebas Neue', sans-serif; font-size: clamp(2.5rem, 5vw, 4rem); letter-spacing: 0.03em; line-height: 1; margin-bottom: 3rem; }
+  #work { background: var(--off-black); }
+  .filter-bar { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 2.5rem; }
+  .filter-bar button { z-index: 10; position: relative; }
+  .filter-btn { padding: 0.45rem 1rem; font-family: 'DM Sans', sans-serif; font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; background: transparent; color: var(--muted); border: 0.5px solid var(--border); cursor: pointer; transition: all 0.2s; }
+  .filter-btn:hover, .filter-btn.active { background: var(--accent); color: #0a0a0a; border-color: var(--accent); }
+  .work-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 1px; background: var(--border); }
+  .work-card-wrapper { text-decoration: none; display: block; color: inherit; transition: transform 0.3s; }
+  .work-card-wrapper:hover { z-index: 2; transform: scale(1.01); }
+  .work-card-wrapper:hover .work-overlay { opacity: 1; }
+  .work-card-wrapper.span-8 { grid-column: span 8; }
+  .work-card-wrapper.span-4 { grid-column: span 4; }
+  .work-card-wrapper.span-6 { grid-column: span 6; }
+  .work-card-wrapper.span-5 { grid-column: span 5; }
+  .work-card-wrapper.span-7 { grid-column: span 7; }
+  .work-card { background: var(--off-black); position: relative; overflow: hidden; height: 100%; width: 100%; }
+  .work-thumb { width: 100%; aspect-ratio: 16/10; background: var(--surface); display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+  .work-card-wrapper.span-4 .work-thumb, .work-card-wrapper.span-5 .work-thumb { aspect-ratio: 4/5; }
+  .work-thumb img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; }
+  .work-thumb-icon { position: relative; z-index: 1; font-size: 1.5rem; color: rgba(240,237,230,0.3); }
+  .work-overlay { position: absolute; inset: 0; background: rgba(10,10,10,0.7); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s; z-index: 2; }
+  .work-play { width: 52px; height: 52px; border: 1.5px solid rgba(240,237,230,0.6); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--text); font-size: 1rem; }
+  .work-meta { padding: 1rem 1.2rem; border-top: 0.5px solid var(--border); background: var(--off-black); position: relative; z-index: 3; }
+  .work-category { font-size: 0.62rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.3rem; }
+  .work-name { font-size: 0.9rem; font-weight: 400; color: var(--text); line-height: 1.3; }
+  .work-link { display: block; font-size: 0.7rem; color: var(--muted); margin-top: 0.4rem; word-break: break-all; text-decoration: underline; text-underline-offset: 3px; transition: color 0.2s; }
+  .work-card-wrapper:hover .work-link { color: var(--accent); }
+  #services { background: var(--black); }
+  .services-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1px; background: var(--border); }
+  .service-card { background: var(--black); padding: 2rem 1.5rem; transition: background 0.25s; }
+  .service-card:hover { background: var(--surface); }
+  .service-num { font-family: 'Bebas Neue', sans-serif; font-size: 3rem; line-height: 1; color: rgba(240,237,230,0.06); margin-bottom: 1rem; }
+  .service-icon { font-size: 1.3rem; color: var(--accent); margin-bottom: 1rem; display: block; }
+  .service-title { font-size: 1rem; font-weight: 500; margin-bottom: 0.5rem; }
+  .service-desc { font-size: 0.82rem; font-weight: 300; color: var(--muted); line-height: 1.65; }
+  #about { background: var(--surface); display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: center; }
+  .about-title { font-family: 'Bebas Neue', sans-serif; font-size: clamp(2.5rem, 4vw, 3.5rem); line-height: 1.05; margin-bottom: 1.5rem; }
+  .about-body { font-size: 0.95rem; font-weight: 300; line-height: 1.8; color: var(--muted); margin-bottom: 1.5rem; }
+  .about-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1.5rem; }
+  .tag { font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); background: var(--tag-bg); border: 0.5px solid rgba(212,168,83,0.2); padding: 0.35rem 0.75rem; }
+  .about-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); }
+  .about-stat { background: var(--surface); padding: 1.8rem 1.5rem; }
+  .about-stat-n { font-family: 'Bebas Neue', sans-serif; font-size: 3rem; color: var(--text); line-height: 1; display: block; }
+  .about-stat-accent { color: var(--accent); }
+  .about-stat-l { font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-top: 0.25rem; display: block; }
+  #collabs { background: var(--off-black); text-align: center; padding: 4rem 2.5rem; }
+  .collab-label { font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 2.5rem; }
+  .brand-row { display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap; }
+  .brand-pill { padding: 0.6rem 1.4rem; border: 0.5px solid var(--border); font-size: 0.8rem; font-weight: 400; letter-spacing: 0.08em; color: var(--muted); transition: all 0.2s; }
+  .brand-pill:hover { color: var(--text); border-color: rgba(240,237,230,0.3); }
+  #contact { background: var(--black); text-align: center; display: flex; flex-direction: column; align-items: center; }
+  .contact-big { font-family: 'Bebas Neue', sans-serif; font-size: clamp(3rem, 7vw, 6rem); line-height: 0.95; letter-spacing: 0.02em; margin-bottom: 1.5rem; }
+  .contact-big span { color: var(--accent); }
+  .contact-sub { font-size: 0.95rem; font-weight: 300; color: var(--muted); max-width: 400px; line-height: 1.7; margin-bottom: 2.5rem; }
+  .contact-links { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
+  footer { border-top: 0.5px solid var(--border); padding: 1.5rem 2.5rem; display: flex; align-items: center; justify-content: space-between; background: var(--off-black); }
+  .footer-logo { font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; letter-spacing: 0.15em; color: var(--muted); }
+  .footer-right { font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(240,237,230,0.25); }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+  .hero-eyebrow { animation: fadeUp 0.6s ease both; }
+  .hero h1 { animation: fadeUp 0.7s 0.1s ease both; }
+  .hero-body { animation: fadeUp 0.7s 0.2s ease both; }
+  .hero-ctas { animation: fadeUp 0.7s 0.3s ease both; }
+  .hero-visual { animation: fadeUp 0.8s 0.25s ease both; }
+  @media (max-width: 900px) {
+    .hero { grid-template-columns: 1fr; min-height: auto; padding-top: 3rem; }
+    .hero-visual { height: 360px; }
+    .hero-floats { right: 0; }
+    #about { grid-template-columns: 1fr; gap: 3rem; }
+    .work-card-wrapper.span-8, .work-card-wrapper.span-5, .work-card-wrapper.span-7 { grid-column: span 12; }
+    .work-card-wrapper.span-4, .work-card-wrapper.span-6 { grid-column: span 12; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="#">TEZ</a>
+  <div class="nav-links">
+    <a href="#work">Work</a>
+    <a href="#services">Services</a>
+    <a href="#about">About</a>
+    <a href="#contact">Contact</a>
+  </div>
+</nav>
+
+<section class="hero" id="home">
+  <div class="hero-left">
+    <div class="hero-eyebrow">Video Editor &nbsp;/&nbsp; Creative Director &nbsp;/&nbsp; Content Creator</div>
+    <h1>FRAMES<br/>THAT<br/><span>MOVE.</span></h1>
+    <p class="hero-body">I craft cinematic short-form content, edit with intent, and build brand narratives that feel alive — from gym floors and run routes to campaign sets.</p>
+    <div class="hero-ctas">
+      <a class="btn-primary" href="#work">View My Work ↗</a>
+      <a class="btn-ghost" href="#contact">Let's Collab</a>
+    </div>
+  </div>
+ <div class="hero-visual">
+    <!-- ADDED CLICK ACTION & CURSOR STYLE BELOW -->
+    <div class="hero-reel-card" onclick="window.open('https://www.instagram.com/tezzzzzzzzzzzzzz/reel/DXJvDDijrs4/', '_blank')" style="cursor: pointer;">
+      
+      <!-- LATEST REEL THUMBNAIL -->
+      <img src="https://lh3.googleusercontent.com/d/1rndkRPLv7ZOin9Th5jm9i4orzLPc8BpF" alt="Latest Reel Thumbnail" style="width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; z-index: 0;">
+
+      <div class="hero-reel-placeholder" style="z-index: 1; background: transparent;">
+        <div class="hero-reel-placeholder-icon" style="background: rgba(10,10,10,0.5); backdrop-filter: blur(4px);">▶</div>
+      </div>
+      
+      <div class="hero-reel-info" style="z-index: 2;">
+        <span class="hero-reel-tag">Latest Reel</span>
+        <!-- STOPPROPAGATION PREVENTS DOUBLE-TAB BROWSING CONFLICTS -->
+        <p><a href="https://www.instagram.com/tezzzzzzzzzzzzzz/reel/DXJvDDijrs4/" target="_blank" onclick="event.stopPropagation();" style="color: var(--text); text-decoration: underline;">Watch Reel ↗</a></p>
+      </div>
+    </div>
+
+    <div class="hero-floats">
+      <div class="hero-stat">
+        <span class="hero-stat-n">1.5M</span>
+        <span class="hero-stat-l">Total Views</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-n">900+</span>
+        <span class="hero-stat-l">Followers</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-n">2+</span>
+        <span class="hero-stat-l">Years Creating</span>
+      </div>
+    </div>
+  </div>
+
+<section id="work">
+  <div class="section-eyebrow">Selected Work</div>
+  <h2 class="section-title">THE REEL</h2>
+  <div class="filter-bar">
+    <button class="filter-btn active" onclick="filterWork(this,'all')">All</button>
+    <button class="filter-btn" onclick="filterWork(this,'film')">Film / Reels</button>
+    <button class="filter-btn" onclick="filterWork(this,'brand')">Brand Collabs</button>
+    <button class="filter-btn" onclick="filterWork(this,'fitness')">Fitness</button>
+    <button class="filter-btn" onclick="filterWork(this,'lifestyle')">Lifestyle/Travel</button>
+  </div>
+  
+  <div class="work-grid" id="work-grid">
+    
+   <!-- THUMBNAIL 1: CINEMATIC GYM EDIT -->
+<a href="https://www.instagram.com/tezzzzzzzzzzzzzz/reel/DUA6K9RjGHa/" target="_blank" class="work-card-wrapper span-8" data-cat="fitness">
+  <div class="work-card">
+    <div class="work-thumb">
+      <!-- FIXED LINK BELOW -->
+      <img src="https://lh3.googleusercontent.com/d/1gZDW5SdbMAaLwaJF2O0T4mIS81nL28U5" alt="Cinematic Gym Edit Thumbnail">
+      <span class="work-thumb-icon" style="font-size:2rem; color:rgba(212,168,83,0.15);">▶</span>
+      <div class="work-overlay"><div class="work-play">▶</div></div>
+    </div>
+    <div class="work-meta">
+      <div class="work-category">Fitness / Reel</div>
+      <div class="work-name">Cinematic Gym Edit — Featured Reel</div>
+      <span class="work-link">View Project ↗</span>
+    </div>
+  </div>
+</a>
+    <!-- THUMBNAIL 2: CHKOKKO CAMPAIGN -->
+    <a href="https://www.instagram.com/reel/DYPSr5bOf_8/" target="_blank" class="work-card-wrapper span-4" data-cat="brand">
+      <div class="work-card">
+        <div class="work-thumb">
+          <img src="https://lh3.googleusercontent.com/d/1VItMy_E3X0uZbZ-trngCte9_AIJ83ut4" alt="Chkokko Athleisure Thumbnail">
+          <span class="work-thumb-icon">▶</span>
+          <div class="work-overlay"><div class="work-play">▶</div></div>
+        </div>
+        <div class="work-meta">
+          <div class="work-category">Brand Collab</div>
+          <div class="work-name">Chkokko — Athleisure Campaign</div>
+          <span class="work-link">View Project ↗</span>
+        </div>
+      </div>
+    </a>
+
+    <!-- THUMBNAIL 3: MAGA RETAIL COLLAB -->
+    <a href="https://www.instagram.com/reel/DV0x6zGDs7M/" target="_blank" class="work-card-wrapper span-5" data-cat="brand">
+      <div class="work-card">
+        <div class="work-thumb">
+          <img src="https://lh3.googleusercontent.com/d/12RlsKUnBkX32G94Vh-8TgAHnk-Tz0dIt" alt="Maga Retail- Product Showcase/Cinematic reel Thumbnail">
+          <span class="work-thumb-icon">▶</span>
+          <div class="work-overlay"><div class="work-play">▶</div></div>
+        </div>
+        <div class="work-meta">
+          <div class="work-category">Brand Collab</div>
+          <div class="work-name">Maga Retail- Product Showcase/Cinematic reel</div>
+          <span class="work-link">View Project ↗</span>
+        </div>
+      </div>
+    </a>
+
+    <!-- THUMBNAIL 4: CINEMATIC COLOUR GRADE -->
+    <a href="https://www.instagram.com/p/DXypr6Qubgi/" target="_blank" class="work-card-wrapper span-7" data-cat="film">
+      <div class="work-card">
+        <div class="work-thumb">
+          <img src="https://lh3.googleusercontent.com/d/1-erOTfpDQs024QUgMsQMtt0jpaTLs89i" alt="Colour Grade Thumbnail">
+          <span class="work-thumb-icon">▶</span>
+          <div class="work-overlay"><div class="work-play">▶</div></div>
+        </div>
+        <div class="work-meta">
+          <div class="work-category">Film / Edit</div>
+          <div class="work-name">Cinematic Colour Grade — Short Form</div>
+          <span class="work-link">View Project ↗</span>
+        </div>
+      </div>
+    </a>
+
+    <!-- THUMBNAIL 5: LDR Cinematic reel -->
+    <a href="https://www.instagram.com/p/DVLh7NIjE-B/" target="_blank" class="work-card-wrapper span-6" data-cat="fitness">
+      <div class="work-card">
+        <div class="work-thumb">
+          <img src="https://lh3.googleusercontent.com/d/1QBwd_dHSgzK3QXwksZK0ONLfWnXseCj6" alt="LDR Cinematic reel Thumbnail">
+          <span class="work-thumb-icon">▶</span>
+          <div class="work-overlay"><div class="work-play">▶</div></div>
+        </div>
+        <div class="work-meta">
+          <div class="work-category">Fitness</div>
+          <div class="work-name">Cinammon Girl- Cinematic Edit</div>
+          <span class="work-link">View Project ↗</span>
+        </div>
+      </div>
+    </a>
+
+    <!-- THUMBNAIL 6: PRODUCT SHOWCASE  Decathlon-->
+    <a href="https://www.instagram.com/reel/DUkcD7_D5y4/" target="_blank" class="work-card-wrapper span-6" data-cat="brand">
+      <div class="work-card">
+        <div class="work-thumb">
+          <img src="https://lh3.googleusercontent.com/d/1f0g-AU9TefNVtyMiiF0DFzkqy_xNI3KB" alt="Product Showcase Thumbnail">
+          <span class="work-thumb-icon">▶</span>
+          <div class="work-overlay"><div class="work-play">▶</div></div>
+        </div>
+        <div class="work-meta">
+          <div class="work-category">Brand / Content</div>
+          <div class="work-name">Product Showcase with Decathlon </div>
+          <span class="work-link">View Project ↗</span>
+        </div>
+      </div>
+    </a>
+    
+     <!-- THUMBNAIL 6: kala bhoomi-->
+    <a href="https://www.instagram.com/p/Co9r9ZkJyNb/" target="_blank" class="work-card-wrapper span-6" data-cat="lifestyle">
+      <div class="work-card">
+        <div class="work-thumb">
+          <img src="https://lh3.googleusercontent.com/d/1_qcmMN_FY86SAXtUAzBO9GM3ixbBKRzJ" alt="Kala Bhoomi Thumbnail">
+          <span class="work-thumb-icon">▶</span>
+          <div class="work-overlay"><div class="work-play">▶</div></div>
+        </div>
+        <div class="work-meta">
+          <div class="work-category">Brand / Content</div>
+          <div class="work-name">Museum Cinematic Pan Shots </div>
+          <span class="work-link">View Project ↗</span>
+        </div>
+      </div>
+    </a>
+
+  </div>
+</section>
+
+<section id="services">
+  <div class="section-eyebrow">What I Do</div>
+  <h2 class="section-title">SERVICES</h2>
+  <div class="services-grid">
+    <div class="service-card">
+      <div class="service-num">01</div>
+      <span class="service-icon">✂</span>
+      <div class="service-title">Video Editing</div>
+      <div class="service-desc">Reels, short-form, long-form cuts. Colour grading, transitions, sound design — built for the scroll.</div>
+    </div>
+    <div class="service-card">
+      <div class="service-num">02</div>
+      <span class="service-icon">◈</span>
+      <div class="service-title">Creative Direction</div>
+      <div class="service-desc">Shot lists, moodboards, visual concepts. I shape the story before the camera rolls.</div>
+    </div>
+    <div class="service-card">
+      <div class="service-num">03</div>
+      <span class="service-icon">◉</span>
+      <div class="service-title">Content Creation</div>
+      <div class="service-desc">Full-cycle content for fitness, lifestyle, and D2C brands — from idea to finished deliverable.</div>
+    </div>
+    <div class="service-card">
+      <div class="service-num">04</div>
+      <span class="service-icon">⊹</span>
+      <div class="service-title">Brand Collabs</div>
+      <div class="service-desc">Paid and barter partnerships. Instagram-native content that performs, not just looks good.</div>
+    </div>
+  </div>
+</section>
+
+<section id="about">
+  <div>
+    <div class="section-eyebrow">About</div>
+    <h2 class="about-title">BANGALORE-BASED.<br/>FRAME-OBSESSED.</h2>
+    <p class="about-body">I'm Tez — editor, director, runner, and chronic overthinker of shot compositions. I make content that feels like it was meant to be watched, not just scrolled past. Fitness, lifestyle, travel, fashion — if there's a story, I'll find the cut.</p>
+    <p class="about-body">Based in Bangalore, India. Always training, always shooting.</p>
+    <div class="about-tags">
+      <span class="tag">Premiere Pro</span>
+      <span class="tag">DaVinci Resolve</span>
+      <span class="tag">CapCut</span>
+      <span class="tag">Short-Form</span>
+      <span class="tag">Colour Grading</span>
+      <span class="tag">Instagram Reels</span>
+      <span class="tag">Fitness</span>
+      <span class="tag">Lifestyle</span>
+      <span class="tag">Travel</span>
+    </div>
+  </div>
+  <div class="about-stats">
+    <div class="about-stat">
+      <span class="about-stat-n">1.5<span class="about-stat-accent">M</span></span>
+      <span class="about-stat-l">Total Views</span>
+    </div>
+    <div class="about-stat">
+      <span class="about-stat-n">600<span class="about-stat-accent">K</span></span>
+      <span class="about-stat-l">Peak Single Reel</span>
+    </div>
+    <div class="about-stat">
+      <span class="about-stat-n">900<span class="about-stat-accent">+</span></span>
+      <span class="about-stat-l">Followers</span>
+    </div>
+    <div class="about-stat">
+      <span class="about-stat-n">5<span class="about-stat-accent">+</span></span>
+      <span class="about-stat-l">Brand Collabs</span>
+    </div>
+  </div>
+</section>
+
+<section id="collabs">
+  <div class="collab-label">Brands & Collaborations</div>
+  <div class="brand-row">
+    <div class="brand-pill">Chkokko</div>
+    <div class="brand-pill">Decathlon</div>
+    <div class="brand-pill">Maga Retail</div>
+    <div class="brand-pill">Sockscarving</div>
+    <div class="brand-pill">Cult</div>
+    <div class="brand-pill">Add More ↗</div>
+  </div>
+</section>
+
+<section id="contact">
+  <h2 class="contact-big">LET'S<br/>MAKE<br/><span>SOMETHING.</span></h2>
+  <p class="contact-sub">Got a brand, a project, or just a mood board? Slide in. I'm always down for a good collab.</p>
+  <div class="contact-links">
+    <a class="btn-primary" href="mailto:tejeswar29.dora@email.com">Email Me ↗</a>
+    <a class="btn-ghost" href="https://instagram.com/tezzzzzzzzzzzzzz" target="_blank">Instagram</a>
+  </div>
+</section>
+
+<footer>
+  <span class="footer-logo">TEZ</span>
+  <span class="footer-right">© 2026 — Video Editor / Content Creator</span>
+</footer>
+
+<script>
+function filterWork(event, cat) {
+  // If the button click sets off an event, prevent it from jumping pages
+  if(event && event.stopPropagation) {
+    event.stopPropagation();
+  }
+  
+  // Clean filtering action
+  const clickedBtn = event.target || event;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  if(clickedBtn.classList) clickedBtn.classList.add('active');
+  
+  document.querySelectorAll('.work-card-wrapper').forEach(card => {
+    if (cat === 'all' || card.dataset.cat === cat) {
+      card.style.display = '';
+    } else {
+      card.style.display = 'none';
+    }
+  });
+}
+// Hotfix to pass button element perfectly to standard click function
+const originalFilter = filterWork;
+filterWork = function(btnElement, cat) {
+  originalFilter({target: btnElement, stopPropagation: function(){}}, cat);
+}
+</script>
+</body>
+</html>
