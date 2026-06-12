@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TEZZ — A Filmmaker's World</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --void:       #080608;
+  --ember:      #120808;
+  --ember2:     #1a0c0c;
+  --red:        #C8102E;
+  --bloom:      #FF3D5A;
+  --ash:        #6B2020;
+  --parch:      #F0DDD0;
+  --parch-dim:  #9A7060;
+  --parch-mute: #4A3028;
+  --border:     #2A1010;
+  --border-hi:  #5A2020;
+  --px:    'Pixelify Sans', monospace;
+  --serif: 'Crimson Pro', Georgia, serif;
+  --mono:  'Space Mono', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--serif);
+  background: var(--void);
+  color: var(--parch);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+  pointer-events: none;
+  z-index: 9998;
+  mix-blend-mode: overlay;
+}
+
+/* ── BOOT ── */
+#boot {
+  position: fixed; inset: 0;
+  background: var(--void);
+  z-index: 9999;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  transition: opacity 0.8s ease;
+}
+#boot.fade { opacity: 0; pointer-events: none; }
+.boot-moon {
+  width: 72px; height: 72px;
+  background: radial-gradient(circle at 35% 35%, #F0DDD0, #C8A090);
+  margin: 0 auto 24px;
+  clip-path: polygon(12% 0%,88% 0%,100% 12%,100% 88%,88% 100%,12% 100%,0% 88%,0% 12%);
+  box-shadow: 0 0 40px rgba(240,221,208,0.15), 0 0 80px rgba(200,16,46,0.08);
+  animation: moonpulse 3s ease-in-out infinite;
+  position: relative;
+}
+.boot-moon::after {
+  content: '';
+  position: absolute; top: 16px; left: 16px;
+  width: 14px; height: 14px;
+  background: rgba(0,0,0,0.18);
+  clip-path: polygon(12% 0%,88% 0%,100% 12%,100% 88%,88% 100%,12% 100%,0% 88%,0% 12%);
+}
+@keyframes moonpulse {
+  0%,100% { box-shadow: 0 0 40px rgba(240,221,208,0.15), 0 0 80px rgba(200,16,46,0.08); }
+  50%      { box-shadow: 0 0 60px rgba(240,221,208,0.25), 0 0 120px rgba(200,16,46,0.14); }
+}
+.boot-title {
+  font-family: var(--px);
+  font-size: clamp(52px,15vw,90px);
+  color: var(--parch); letter-spacing: 0.1em; line-height: 1; margin-bottom: 4px;
+  text-shadow: 3px 3px 0 var(--red), 6px 6px 0 rgba(200,16,46,0.3);
+}
+.boot-sub {
+  font-family: var(--serif); font-style: italic;
+  font-size: 14px; color: var(--parch-dim); letter-spacing: 0.08em; margin-bottom: 32px;
+}
+.boot-log {
+  background: rgba(18,8,8,0.9);
+  border: 2px solid var(--border);
+  padding: 14px 18px;
+  font-family: var(--mono); font-size: 11px; color: var(--ash);
+  text-align: left; line-height: 1.9; min-height: 120px;
+  width: min(460px,90vw); position: relative;
+}
+.boot-log::before {
+  content: 'SYSTEM LOG';
+  position: absolute; top: -9px; left: 10px;
+  background: var(--void); padding: 0 6px;
+  font-size: 9px; color: var(--red); letter-spacing: 0.2em;
+}
+.boot-log-line { color: var(--parch-dim); }
+.boot-log-line.ok::after { content: ' [OK]'; color: var(--red); }
+.boot-bar-wrap { margin-top: 16px; width: min(460px,90vw); }
+.boot-bar { height: 5px; background: var(--border); }
+.boot-bar-fill {
+  height: 100%;
+  background: repeating-linear-gradient(90deg,var(--red) 0px,var(--red) 8px,var(--bloom) 8px,var(--bloom) 10px);
+  width: 0%; transition: width 0.15s steps(10);
+  box-shadow: 0 0 8px var(--red);
+}
+.boot-prompt {
+  margin-top: 16px; font-family: var(--px); font-size: 12px; color: var(--red);
+  display: none; animation: blink 1s step-end infinite;
+  text-align: center; width: min(460px,90vw);
+}
+.boot-prompt.show { display: block; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+/* ── NAV ── */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(8,6,8,0.97);
+  border-bottom: 2px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 13px 36px; backdrop-filter: blur(10px);
+}
+.nav-logo-name {
+  font-family: var(--px); font-size: 22px; color: var(--parch);
+  letter-spacing: 0.12em; text-decoration: none;
+  text-shadow: 2px 2px 0 var(--red);
+}
+.nav-logo-tag {
+  font-family: var(--serif); font-style: italic;
+  font-size: 11px; color: var(--parch-dim); margin-left: 10px;
+}
+.nav-links { display: flex; gap: 26px; list-style: none; }
+.nav-links a {
+  font-family: var(--px); font-size: 11px; color: var(--parch-dim);
+  text-decoration: none; letter-spacing: 0.1em; transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--parch); }
+.nav-hp { display: flex; align-items: center; gap: 6px; }
+.hp-label { font-family: var(--mono); font-size: 10px; color: var(--parch-mute); }
+.hp-bar { display: flex; gap: 2px; }
+.hp-pip {
+  width: 8px; height: 10px; background: var(--red);
+  clip-path: polygon(0 10%,10% 0,90% 0,100% 10%,100% 90%,90% 100%,10% 100%,0 90%);
+  box-shadow: 0 0 4px var(--red);
+}
+
+/* ── HERO ── */
+.hero {
+  min-height: 94vh; position: relative;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center; padding: 80px 24px 260px; overflow: hidden;
+}
+.hero-bg-glow {
+  position: absolute; top: 35%; left: 50%; transform: translate(-50%,-50%);
+  width: 700px; height: 500px;
+  background: radial-gradient(ellipse,rgba(200,16,46,0.055) 0%,transparent 70%);
+  pointer-events: none;
+}
+.hero-eyebrow {
+  font-family: var(--serif); font-style: italic; font-size: 14px;
+  color: var(--parch-dim); letter-spacing: 0.14em; margin-bottom: 14px;
+  display: flex; align-items: center; gap: 12px;
+}
+.hero-eyebrow::before,.hero-eyebrow::after { content:''; width:30px; height:1px; background:var(--ash); }
+.hero-name {
+  font-family: var(--px);
+  font-size: clamp(96px,22vw,220px); line-height: 0.85;
+  letter-spacing: 0.04em; color: var(--parch);
+  text-shadow: 4px 4px 0 var(--red), 8px 8px 0 rgba(200,16,46,0.28), 0 0 100px rgba(200,16,46,0.08);
+  position: relative; z-index: 2;
+}
+.hero-sub {
+  font-family: var(--serif); font-style: italic;
+  font-size: clamp(15px,2.5vw,20px); color: var(--parch-dim);
+  margin-top: 14px; margin-bottom: 44px; letter-spacing: 0.04em;
+}
+.hero-stats {
+  display: flex; gap: 0; border: 2px solid var(--border);
+  position: relative; z-index: 2; flex-wrap: wrap; justify-content: center;
+}
+.h-stat {
+  padding: 14px 26px; border-right: 2px solid var(--border);
+  text-align: center; background: rgba(18,8,8,0.75); backdrop-filter: blur(4px);
+}
+.h-stat:last-child { border-right: none; }
+.h-stat-n {
+  font-family: var(--px); font-size: 24px; color: var(--red);
+  line-height: 1; text-shadow: 2px 2px 0 rgba(200,16,46,0.35);
+}
+.h-stat-l { font-family: var(--serif); font-style: italic; font-size: 12px; color: var(--parch-dim); margin-top: 4px; }
+
+/* ── PIXEL LANDSCAPE ── */
+.landscape-wrap {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 230px; overflow: hidden; pointer-events: none;
+}
+.landscape-svg { width: 100%; height: 100%; image-rendering: pixelated; }
+.firefly {
+  position: absolute; width: 3px; height: 3px; background: #FFE090;
+  image-rendering: pixelated;
+  animation: fly var(--dur,4s) ease-in-out var(--del,0s) infinite; opacity: 0;
+}
+@keyframes fly {
+  0%   { opacity:0; transform:translate(0,0); }
+  20%  { opacity:0.85; }
+  80%  { opacity:0.5; }
+  100% { opacity:0; transform:translate(var(--dx,20px),var(--dy,-35px)); }
+}
+
+/* ── SECTION COMMON ── */
+.sec-wrap { max-width: 1140px; margin: 0 auto; padding: 80px 32px; }
+.sec-eye {
+  font-family: var(--px); font-size: 11px; color: var(--red);
+  letter-spacing: 0.3em; margin-bottom: 10px;
+  display: flex; align-items: center; gap: 10px;
+}
+.sec-eye::after { content:''; flex:1; height:1px; background:var(--border); }
+.sec-ttl {
+  font-family: var(--px); font-size: clamp(28px,5vw,52px);
+  color: var(--parch); letter-spacing: 0.05em; margin-bottom: 36px;
+  text-shadow: 2px 2px 0 var(--red);
+}
+
+/* ── CLASS SELECT ── */
+.class-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(190px,1fr)); gap: 14px; }
+.class-card {
+  background: var(--ember); border: 2px solid var(--border);
+  padding: 22px 18px; cursor: pointer; transition: all 0.2s; position: relative;
+}
+.class-card::before {
+  content:''; position:absolute; top:4px; left:4px;
+  width:8px; height:8px; border-top:2px solid var(--ash); border-left:2px solid var(--ash);
+  transition: border-color 0.2s;
+}
+.class-card::after {
+  content:''; position:absolute; bottom:4px; right:4px;
+  width:8px; height:8px; border-bottom:2px solid var(--ash); border-right:2px solid var(--ash);
+  transition: border-color 0.2s;
+}
+.class-card:hover,.class-card.active {
+  border-color:var(--red); background:#1f0a0a;
+  transform:translate(-2px,-2px); box-shadow:4px 4px 0 var(--red);
+}
+.class-card:hover::before,.class-card.active::before,
+.class-card:hover::after,.class-card.active::after { border-color:var(--red); }
+.cc-sel { position:absolute; top:7px; right:9px; font-family:var(--px); font-size:10px; color:var(--red); opacity:0; transition:opacity 0.2s; }
+.class-card.active .cc-sel { opacity:1; }
+.cc-icon { font-size:30px; display:block; margin-bottom:10px; }
+.cc-rar { font-family:var(--mono); font-size:9px; color:var(--red); letter-spacing:0.22em; margin-bottom:5px; }
+.cc-nm { font-family:var(--px); font-size:17px; color:var(--parch); margin-bottom:6px; letter-spacing:0.05em; }
+.cc-desc { font-family:var(--serif); font-style:italic; font-size:12px; color:var(--parch-dim); line-height:1.55; }
+
+/* ── FILTER BAR ── */
+.filter-bar { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:28px; }
+.f-btn {
+  font-family:var(--px); font-size:11px; padding:6px 14px;
+  background:var(--ember); border:2px solid var(--border);
+  color:var(--parch-dim); cursor:pointer; letter-spacing:0.1em; transition:all 0.15s;
+}
+.f-btn:hover { border-color:var(--ash); color:var(--parch); }
+.f-btn.active { background:var(--red); border-color:var(--bloom); color:var(--parch); box-shadow:2px 2px 0 rgba(200,16,46,0.4); }
+
+/* ── WORK GRID ── */
+.work-grid {
+  display: grid; grid-template-columns: repeat(12,1fr);
+  gap: 3px; background: var(--border);
+}
+.wc {
+  display: block; text-decoration: none; color: inherit;
+  background: var(--void); transition: transform 0.25s; position: relative;
+}
+.wc:hover { transform:scale(1.012); z-index:2; }
+.wc.s8  { grid-column:span 8; }
+.wc.s4  { grid-column:span 4; }
+.wc.s7  { grid-column:span 7; }
+.wc.s5  { grid-column:span 5; }
+.wc.s6  { grid-column:span 6; }
+
+/* THUMBNAIL — strict 16:9, no letterbox, centred crop */
+.wthumb {
+  width: 100%; aspect-ratio: 9/16;
+  max-height: 480px;
+  overflow: hidden; position: relative; background: var(--ember);
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgba(200,16,46,0.04) 0px, rgba(200,16,46,0.04) 1px,
+    transparent 1px, transparent 10px
+  );
+}
+.wthumb img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: contain;
+  object-position: center center;
+  display: block;
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.4s ease;
+}
+.wthumb img.loaded { opacity: 1; }
+.wc:hover .wthumb img { transform:scale(1.04); }
+
+/* Fallback label shown when img hasn't loaded */
+.wthumb-fallback {
+  position: absolute; inset: 0; z-index: 1;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 10px;
+  padding: 12px;
+}
+.wthumb-fallback-icon {
+  font-size: 28px; color: rgba(200,16,46,0.35);
+}
+.wthumb-fallback-name {
+  font-family: var(--px); font-size: 11px; color: var(--parch-mute);
+  text-align: center; letter-spacing: 0.08em; line-height: 1.4;
+}
+/* Hide fallback once image loads */
+.wthumb img.loaded ~ .wthumb-fallback { display: none; }
+
+/* rarity top bar */
+.w-rarity-bar { position:absolute; top:0; left:0; right:0; height:3px; z-index:3; }
+.rb-red  { background:linear-gradient(90deg,var(--red),var(--bloom)); box-shadow:0 0 6px var(--red); }
+.rb-pur  { background:linear-gradient(90deg,#4A1080,#9B30C8); }
+.rb-blue { background:linear-gradient(90deg,#0A4080,#1090FF); }
+
+.w-badge {
+  position:absolute; top:10px; left:10px; z-index:3;
+  font-family:var(--px); font-size:9px; padding:3px 8px;
+  background:rgba(8,6,8,0.88); border:1px solid var(--border);
+  color:var(--parch-dim); letter-spacing:0.1em;
+}
+
+/* play overlay */
+.w-overlay {
+  position:absolute; inset:0;
+  background:rgba(8,4,8,0.62);
+  display:flex; align-items:center; justify-content:center;
+  opacity:0; transition:opacity 0.25s; z-index:4;
+}
+.wc:hover .w-overlay { opacity:1; }
+.w-play {
+  width:50px; height:50px; border:2px solid var(--parch);
+  clip-path:polygon(0 10%,10% 0,90% 0,100% 10%,100% 90%,90% 100%,10% 100%,0 90%);
+  display:flex; align-items:center; justify-content:center;
+  font-size:18px; color:var(--parch);
+  background:rgba(200,16,46,0.3); image-rendering:pixelated;
+}
+
+.wmeta {
+  padding:14px 16px; background:var(--ember); border-top:2px solid var(--border);
+}
+.wcat { font-family:var(--mono); font-size:9px; color:var(--red); letter-spacing:0.2em; text-transform:uppercase; margin-bottom:4px; }
+.wname { font-family:var(--px); font-size:15px; color:var(--parch); letter-spacing:0.04em; line-height:1.2; margin-bottom:5px; }
+.wlink { font-family:var(--serif); font-style:italic; font-size:12px; color:var(--parch-mute); transition:color 0.2s; }
+.wc:hover .wlink { color:var(--red); }
+
+/* ── SERVICES ── */
+.services-bg { background:var(--ember); border-top:2px solid var(--border); border-bottom:2px solid var(--border); }
+.spell-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:14px; margin-top:36px; }
+.spell {
+  border:2px solid var(--border); padding:22px 18px;
+  background:rgba(8,6,8,0.6); transition:all 0.2s; position:relative;
+}
+.spell:hover { border-color:var(--ash); background:rgba(20,8,8,0.8); }
+.spell:hover .sp-icon { transform:scale(1.1); filter:drop-shadow(0 0 8px rgba(200,16,46,0.6)); }
+.sp-lvl { position:absolute; top:8px; right:10px; font-family:var(--mono); font-size:9px; color:var(--ash); letter-spacing:0.1em; }
+.sp-icon { font-size:28px; display:block; margin-bottom:10px; transition:all 0.3s; }
+.sp-nm { font-family:var(--px); font-size:16px; color:var(--parch); margin-bottom:7px; letter-spacing:0.05em; }
+.sp-desc { font-family:var(--serif); font-style:italic; font-size:13px; color:var(--parch-dim); line-height:1.6; }
+
+/* ── ABOUT ── */
+.about-grid { display:grid; grid-template-columns:1fr 1fr; gap:60px; align-items:center; }
+.about-title { font-family:var(--px); font-size:clamp(24px,4vw,44px); color:var(--parch); letter-spacing:0.05em; margin-bottom:18px; text-shadow:2px 2px 0 var(--red); line-height:1.1; }
+.about-body { font-family:var(--serif); font-size:15px; font-weight:300; line-height:1.85; color:var(--parch-dim); margin-bottom:14px; }
+.about-tags { display:flex; flex-wrap:wrap; gap:7px; margin-top:18px; }
+.atag { font-family:var(--px); font-size:10px; letter-spacing:0.1em; color:var(--red); background:rgba(200,16,46,0.08); border:1px solid rgba(200,16,46,0.25); padding:4px 10px; }
+.about-stats { display:grid; grid-template-columns:1fr 1fr; gap:2px; background:var(--border); }
+.a-stat { background:var(--ember2); padding:22px 18px; }
+.a-stat-n { font-family:var(--px); font-size:36px; color:var(--parch); line-height:1; text-shadow:2px 2px 0 var(--red); }
+.a-stat-n span { color:var(--red); }
+.a-stat-l { font-family:var(--serif); font-style:italic; font-size:12px; color:var(--parch-dim); margin-top:4px; }
+
+/* ── COLLABS ── */
+.collab-sec { background:var(--ember); border-top:2px solid var(--border); text-align:center; padding:60px 32px; }
+.collab-lbl { font-family:var(--serif); font-style:italic; font-size:13px; color:var(--parch-dim); letter-spacing:0.1em; margin-bottom:28px; }
+.brand-row { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+.brand-pill { font-family:var(--px); font-size:11px; letter-spacing:0.1em; padding:8px 18px; border:2px solid var(--border); color:var(--parch-dim); background:var(--ember2); transition:all 0.2s; }
+.brand-pill:hover { color:var(--parch); border-color:var(--ash); background:rgba(200,16,46,0.08); }
+
+/* ── CONTACT ── */
+.contact-wrap { max-width:600px; margin:0 auto; padding:100px 32px; text-align:center; }
+.contact-big { font-family:var(--px); font-size:clamp(42px,10vw,90px); line-height:0.9; color:var(--parch); letter-spacing:0.04em; margin-bottom:18px; }
+.contact-big span { color:var(--red); text-shadow:2px 2px 0 rgba(200,16,46,0.4); }
+.contact-sub { font-family:var(--serif); font-style:italic; font-size:15px; color:var(--parch-dim); line-height:1.75; margin-bottom:36px; max-width:400px; margin-left:auto; margin-right:auto; }
+.contact-btns { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+.c-btn { display:inline-flex; align-items:center; gap:8px; font-family:var(--px); font-size:11px; letter-spacing:0.12em; text-decoration:none; padding:12px 22px; transition:all 0.15s; }
+.c-btn.primary { background:var(--red); color:var(--parch); border:2px solid var(--bloom); }
+.c-btn.primary:hover { background:var(--bloom); transform:translate(-1px,-1px); box-shadow:3px 3px 0 rgba(200,16,46,0.4); }
+.c-btn.ghost { color:var(--parch-dim); border:2px solid var(--border); background:var(--ember); }
+.c-btn.ghost:hover { color:var(--parch); border-color:var(--red); transform:translate(-1px,-1px); box-shadow:3px 3px 0 var(--border); }
+
+/* ── FOOTER ── */
+footer { border-top:2px solid var(--border); padding:18px 36px; display:flex; align-items:center; justify-content:space-between; background:var(--ember); }
+.f-logo { font-family:var(--px); font-size:18px; color:var(--parch-mute); text-shadow:1px 1px 0 var(--red); }
+.f-right { font-family:var(--mono); font-size:10px; color:var(--parch-mute); letter-spacing:0.08em; }
+
+/* ── AI CHAT ── */
+#chat-toggle {
+  position:fixed; bottom:24px; right:24px; z-index:500;
+  background:var(--red); color:var(--parch); border:2px solid var(--bloom);
+  padding:10px 16px; font-family:var(--px); font-size:11px; letter-spacing:0.1em;
+  cursor:pointer; transition:all 0.15s; box-shadow:3px 3px 0 rgba(200,16,46,0.35);
+  display:flex; align-items:center; gap:7px;
+}
+#chat-toggle:hover { background:var(--bloom); transform:translate(-1px,-1px); box-shadow:4px 4px 0 rgba(200,16,46,0.4); }
+#chat-panel {
+  position:fixed; bottom:76px; right:24px; width:min(370px,calc(100vw - 48px));
+  background:var(--ember2); border:2px solid var(--border-hi);
+  z-index:499; display:none; flex-direction:column; box-shadow:6px 6px 0 rgba(200,16,46,0.12);
+}
+#chat-panel.open { display:flex; }
+.ch-head { background:rgba(200,16,46,0.1); border-bottom:2px solid var(--border); padding:11px 14px; display:flex; align-items:center; justify-content:space-between; }
+.ch-avatar { width:26px; height:26px; background:var(--red); clip-path:polygon(12% 0%,88% 0%,100% 12%,100% 88%,88% 100%,12% 100%,0% 88%,0% 12%); display:flex; align-items:center; justify-content:center; font-size:12px; margin-right:9px; }
+.ch-title { font-family:var(--px); font-size:12px; color:var(--parch); letter-spacing:0.08em; }
+.ch-sub { font-family:var(--serif); font-style:italic; font-size:11px; color:var(--parch-dim); }
+.ch-x { background:none; border:none; color:var(--parch-dim); font-size:18px; cursor:pointer; padding:0 4px; transition:color 0.2s; }
+.ch-x:hover { color:var(--parch); }
+.ch-msgs { flex:1; max-height:290px; overflow-y:auto; padding:13px; display:flex; flex-direction:column; gap:9px; scrollbar-width:thin; scrollbar-color:var(--border) transparent; }
+.msg { max-width:85%; padding:9px 12px; font-family:var(--serif); font-size:13px; line-height:1.5; }
+.msg.ai { background:rgba(18,8,8,0.8); border:1px solid var(--border); border-left:3px solid var(--red); align-self:flex-start; color:var(--parch); }
+.msg.user { background:rgba(200,16,46,0.1); border:1px solid rgba(200,16,46,0.25); align-self:flex-end; color:var(--parch-dim); font-style:italic; }
+.msg.typing { background:rgba(18,8,8,0.8); border:1px solid var(--border); border-left:3px solid var(--ash); align-self:flex-start; font-family:var(--px); font-size:11px; color:var(--ash); animation:blink 0.8s step-end infinite; }
+.ch-input-row { display:flex; border-top:2px solid var(--border); }
+.ch-in { flex:1; background:transparent; border:none; padding:10px 13px; font-family:var(--serif); font-style:italic; font-size:13px; color:var(--parch); outline:none; }
+.ch-in::placeholder { color:var(--parch-mute); }
+.ch-go { background:var(--red); border:none; color:var(--parch); font-family:var(--px); font-size:11px; letter-spacing:0.1em; padding:0 14px; cursor:pointer; transition:background 0.15s; border-left:2px solid var(--border); }
+.ch-go:hover { background:var(--bloom); }
+.ch-go:disabled { background:var(--border); color:var(--parch-mute); cursor:not-allowed; }
+
+/* ── MODAL ── */
+.overlay { position:fixed; inset:0; background:rgba(4,2,4,0.95); z-index:800; display:none; align-items:center; justify-content:center; padding:20px; backdrop-filter:blur(6px); }
+.overlay.open { display:flex; }
+.modal { background:var(--ember2); border:2px solid var(--border-hi); width:min(680px,95vw); max-height:90vh; overflow-y:auto; position:relative; box-shadow:8px 8px 0 rgba(200,16,46,0.1); }
+.modal-x { position:absolute; top:11px; right:11px; background:var(--ember); border:2px solid var(--border); color:var(--parch-dim); width:30px; height:30px; font-family:var(--px); font-size:13px; cursor:pointer; transition:all 0.15s; display:flex; align-items:center; justify-content:center; z-index:5; }
+.modal-x:hover { border-color:var(--red); color:var(--parch); }
+.modal-vid { width:100%; aspect-ratio:16/9; background:#000; }
+.modal-vid iframe { width:100%; height:100%; border:none; }
+.modal-body { padding:20px 22px; }
+.modal-title { font-family:var(--px); font-size:24px; color:var(--parch); margin-bottom:7px; text-shadow:2px 2px 0 var(--red); }
+.modal-txt { font-family:var(--serif); font-style:italic; font-size:14px; color:var(--parch-dim); line-height:1.7; margin-bottom:18px; }
+.modal-link { display:inline-flex; align-items:center; gap:8px; font-family:var(--px); font-size:11px; letter-spacing:0.1em; color:var(--parch); background:var(--red); text-decoration:none; padding:10px 20px; border:2px solid var(--bloom); transition:all 0.15s; }
+.modal-link:hover { background:var(--bloom); transform:translate(-1px,-1px); box-shadow:3px 3px 0 rgba(200,16,46,0.4); }
+
+/* ── REVEAL ── */
+.reveal { opacity:0; transform:translateY(14px); transition:opacity 0.5s ease,transform 0.5s ease; }
+.reveal.visible { opacity:1; transform:none; }
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .wc.s8,.wc.s7,.wc.s5,.wc.s4,.wc.s6 { grid-column:span 12; }
+  nav { padding:12px 16px; }
+  .nav-links { display:none; }
+  .about-grid { grid-template-columns:1fr; gap:40px; }
+  .sec-wrap { padding:60px 16px; }
+  footer { flex-direction:column; gap:8px; text-align:center; }
+}
+@media(max-width:600px){
+  .hero { padding-bottom:210px; }
+  .hero-stats { display:grid; grid-template-columns:1fr 1fr; }
+  .h-stat:nth-child(3) { border-right:none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ BOOT ═══ -->
+<div id="boot">
+  <div class="boot-moon"></div>
+  <div class="boot-title">TEZZ</div>
+  <div class="boot-sub">a filmmaker's world</div>
+  <div class="boot-log" id="bootLog"></div>
+  <div class="boot-bar-wrap">
+    <div class="boot-bar"><div class="boot-bar-fill" id="bootFill"></div></div>
+  </div>
+  <div class="boot-prompt" id="bootPrompt">▸ PRESS ANY KEY TO ENTER ◂</div>
+</div>
+
+<!-- ═══ APP ═══ -->
+<div id="app" style="display:none">
+
+<nav>
+  <div style="display:flex;align-items:baseline;gap:10px">
+    <a class="nav-logo-name" href="#">TEZZ</a>
+    <span class="nav-logo-tag">filmmaker · editor · creator</span>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#work">WORK</a></li>
+    <li><a href="#services">SERVICES</a></li>
+    <li><a href="#about">ABOUT</a></li>
+    <li><a href="#contact">CONTACT</a></li>
+  </ul>
+  <div class="nav-hp">
+    <span class="hp-label">HP</span>
+    <div class="hp-bar">
+      <div class="hp-pip"></div><div class="hp-pip"></div>
+      <div class="hp-pip"></div><div class="hp-pip"></div>
+      <div class="hp-pip"></div>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg-glow"></div>
+  <div class="hero-eyebrow">Video Editor &nbsp;/&nbsp; Creative Director &nbsp;/&nbsp; Content Creator</div>
+  <h1 class="hero-name">TEZZ</h1>
+  <p class="hero-sub">Frames that move &mdash; from gym floors and run routes to campaign sets</p>
+  <div class="hero-stats reveal">
+    <div class="h-stat"><div class="h-stat-n">1.5M+</div><div class="h-stat-l">Total Views</div></div>
+    <div class="h-stat"><div class="h-stat-n">600K</div><div class="h-stat-l">Peak Single Reel</div></div>
+    <div class="h-stat"><div class="h-stat-n">900+</div><div class="h-stat-l">Followers</div></div>
+    <div class="h-stat"><div class="h-stat-n">5+</div><div class="h-stat-l">Brand Collabs</div></div>
+  </div>
+  <div class="landscape-wrap">
+    <svg class="landscape-svg" viewBox="0 0 1440 230" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated">
+      <defs>
+        <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#090408"/><stop offset="100%" stop-color="#160A0A"/>
+        </linearGradient>
+      </defs>
+      <rect width="1440" height="230" fill="url(#sky)"/>
+      <rect x="80"  y="18" width="2" height="2" fill="#F0DDD0" opacity="0.55"/>
+      <rect x="230" y="9"  width="2" height="2" fill="#F0DDD0" opacity="0.4"/>
+      <rect x="370" y="28" width="2" height="2" fill="#F0DDD0" opacity="0.65"/>
+      <rect x="510" y="7"  width="2" height="2" fill="#F0DDD0" opacity="0.5"/>
+      <rect x="680" y="16" width="2" height="2" fill="#F0DDD0" opacity="0.6"/>
+      <rect x="800" y="4"  width="2" height="2" fill="#F0DDD0" opacity="0.4"/>
+      <rect x="950" y="24" width="2" height="2" fill="#F0DDD0" opacity="0.65"/>
+      <rect x="1090" y="11" width="2" height="2" fill="#F0DDD0" opacity="0.45"/>
+      <rect x="1270" y="20" width="2" height="2" fill="#F0DDD0" opacity="0.55"/>
+      <rect x="1390" y="7"  width="2" height="2" fill="#F0DDD0" opacity="0.4"/>
+      <rect x="50"  y="38" width="2" height="2" fill="#F0DDD0" opacity="0.28"/>
+      <rect x="440" y="46" width="2" height="2" fill="#F0DDD0" opacity="0.28"/>
+      <rect x="1190" y="36" width="2" height="2" fill="#F0DDD0" opacity="0.28"/>
+      <polygon points="0,125 0,230 180,230 380,92 560,112 760,82 960,102 1160,86 1440,108 1440,230" fill="#0E0606" opacity="0.8"/>
+      <polygon points="0,165 0,230 140,230 290,136 440,148 590,128 740,144 900,124 1060,140 1220,120 1380,138 1440,128 1440,230" fill="#160A0A"/>
+      <rect x="158" y="132" width="8" height="42" fill="#0A0404"/>
+      <rect x="146" y="120" width="32" height="14" fill="#0A0404"/>
+      <rect x="150" y="108" width="24" height="14" fill="#0A0404"/>
+      <rect x="156" y="96"  width="12" height="14" fill="#0A0404"/>
+      <rect x="146" y="120" width="4" height="4" fill="#C8102E" opacity="0.45"/>
+      <rect x="170" y="114" width="4" height="4" fill="#C8102E" opacity="0.38"/>
+      <rect x="158" y="102" width="4" height="4" fill="#C8102E" opacity="0.45"/>
+      <rect x="1262" y="127" width="8" height="44" fill="#0A0404"/>
+      <rect x="1250" y="115" width="32" height="14" fill="#0A0404"/>
+      <rect x="1254" y="103" width="24" height="14" fill="#0A0404"/>
+      <rect x="1260" y="91"  width="12" height="14" fill="#0A0404"/>
+      <rect x="1254" y="119" width="4" height="4" fill="#C8102E" opacity="0.38"/>
+      <rect x="1274" y="110" width="4" height="4" fill="#C8102E" opacity="0.45"/>
+      <rect x="714" y="140" width="4" height="22" fill="#0A0404"/>
+      <rect x="708" y="130" width="16" height="12" fill="#0A0404"/>
+      <rect x="710" y="120" width="12" height="12" fill="#0A0404"/>
+      <rect x="712" y="112" width="8"  height="10" fill="#0A0404"/>
+      <rect x="0" y="172" width="1440" height="2" fill="#2A0808" opacity="0.45"/>
+    </svg>
+    <div id="fireflies"></div>
+  </div>
+</section>
+
+<!-- CLASS SELECT -->
+<section style="background:var(--ember);border-top:2px solid var(--border)">
+  <div class="sec-wrap reveal">
+    <div class="sec-eye">SELECT YOUR LENS</div>
+    <h2 class="sec-ttl">PICK A CLASS</h2>
+    <div class="class-grid">
+      <div class="class-card active" onclick="setClassFilter('all',this)">
+        <span class="cc-sel">▸ SELECTED</span><span class="cc-icon">🎮</span>
+        <div class="cc-rar">◆ LEGENDARY</div><div class="cc-nm">ALL WORK</div>
+        <div class="cc-desc">The full archive. Every render, every late night, every cut.</div>
+      </div>
+      <div class="class-card" onclick="setClassFilter('fitness',this)">
+        <span class="cc-sel">▸ SELECTED</span><span class="cc-icon">🏃</span>
+        <div class="cc-rar">◆ EPIC</div><div class="cc-nm">ATHLETE</div>
+        <div class="cc-desc">Race days, run clubs, gym edits built for the streets.</div>
+      </div>
+      <div class="class-card" onclick="setClassFilter('brand',this)">
+        <span class="cc-sel">▸ SELECTED</span><span class="cc-icon">🎬</span>
+        <div class="cc-rar">◆ RARE</div><div class="cc-nm">FILMMAKER</div>
+        <div class="cc-desc">Brand campaigns and cinematic pieces. No talking heads.</div>
+      </div>
+      <div class="class-card" onclick="setClassFilter('film',this)">
+        <span class="cc-sel">▸ SELECTED</span><span class="cc-icon">🎞️</span>
+        <div class="cc-rar">◆ RARE</div><div class="cc-nm">FILM / REELS</div>
+        <div class="cc-desc">Pure edits — colour grades, cinematic shorts, film work.</div>
+      </div>
+      <div class="class-card" onclick="setClassFilter('lifestyle',this)">
+        <span class="cc-sel">▸ SELECTED</span><span class="cc-icon">✈️</span>
+        <div class="cc-rar">◆ UNCOMMON</div><div class="cc-nm">LIFESTYLE/TRAVEL</div>
+        <div class="cc-desc">Places and moments shot with intentional eyes.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WORK -->
+<section id="work" style="background:var(--void)">
+  <div class="sec-wrap" style="padding-top:60px">
+    <div class="sec-eye">THE ARCHIVE</div>
+    <h2 class="sec-ttl">SELECTED WORK</h2>
+    <div class="filter-bar">
+      <button class="f-btn active"  onclick="filterWork(this,'all')">ALL</button>
+      <button class="f-btn" onclick="filterWork(this,'film')">FILM / REELS</button>
+      <button class="f-btn" onclick="filterWork(this,'brand')">BRAND COLLABS</button>
+      <button class="f-btn" onclick="filterWork(this,'fitness')">FITNESS</button>
+      <button class="f-btn" onclick="filterWork(this,'lifestyle')">LIFESTYLE / TRAVEL</button>
+    </div>
+
+    <div class="work-grid" id="workGrid">
+
+      <!-- 1 · Cinematic Gym Edit · fitness · s8 -->
+      <a href="https://www.instagram.com/tezzzzzzzzzzzzzz/reel/DUA6K9RjGHa/" target="_blank" class="wc s8" data-cat="fitness">
+        <div class="wthumb">
+          <div class="w-rarity-bar rb-red"></div>
+          <div class="w-badge">FITNESS · REEL</div>
+          <img src="https://drive.google.com/thumbnail?id=1okWl0gGcfdnIIbu9qL1kp4zU9R0n-YSb&sz=w1200"
+               alt="Cinematic Gym Edit" loading="lazy" onload="this.classList.add('loaded')" onerror="this.style.display='none'">
+          <div class="wthumb-fallback"><div class="wthumb-fallback-icon">▶</div><div class="wthumb-fallback-name">CINEMATIC GYM EDIT</div></div>
+          <div class="w-overlay"><div class="w-play">▶</div></div>
+        </div>
+        <div class="wmeta">
+          <div class="wcat">◆ EPIC · FITNESS / REEL</div>
+          <div class="wname">Cinematic Gym Edit — Featured Reel</div>
+          <div class="wlink">View Project ↗</div>
+        </div>
+      </a>
+
+      <!-- 2 · Chkokko · brand · s4 -->
+      <a href="https://www.instagram.com/reel/DYPSr5bOf_8/" target="_blank" class="wc s4" data-cat="brand">
+        <div class="wthumb">
+          <div class="w-rarity-bar rb-pur"></div>
+          <div class="w-badge">BRAND COLLAB</div>
+          <img src="https://drive.google.com/thumbnail?id=1Bi2ErIwdgQILo02NAOtCE-RQDsjyOHmB&sz=w800"
+               alt="Chkokko Athleisure Campaign" loading="lazy" onload="this.classList.add('loaded')" onerror="this.style.display='none'">
+          <div class="wthumb-fallback"><div class="wthumb-fallback-icon">▶</div><div class="wthumb-fallback-name">CHKOKKO CAMPAIGN</div></div>
+          <div class="w-overlay"><div class="w-play">▶</div></div>
+        </div>
+        <div class="wmeta">
+          <div class="wcat">◆ RARE · BRAND COLLAB</div>
+          <div class="wname">Chkokko — Athleisure Campaign</div>
+          <div class="wlink">View Project ↗</div>
+        </div>
+      </a>
+
+      <!-- 3 · Maga Retail · brand · s5 -->
+      <a href="https://www.instagram.com/reel/DV0x6zGDs7M/" target="_blank" class="wc s5" data-cat="brand">
+        <div class="wthumb">
+          <div class="w-rarity-bar rb-pur"></div>
+          <div class="w-badge">BRAND COLLAB</div>
+          <img src="https://drive.google.com/thumbnail?id=1ZObNQ548knpJHtwzlcYZPSbFok9lB9SL&sz=w800"
+               alt="Maga Retail Product Showcase" loading="lazy" onload="this.classList.add('loaded')" onerror="this.style.display='none'">
+          <div class="wthumb-fallback"><div class="wthumb-fallback-icon">▶</div><div class="wthumb-fallback-name">MAGA RETAIL SHOWCASE</div></div>
+          <div class="w-overlay"><div class="w-play">▶</div></div>
+        </div>
+        <div class="wmeta">
+          <div class="wcat">◆ RARE · BRAND COLLAB</div>
+          <div class="wname">Maga Retail — Product Showcase / Cinematic Reel</div>
+          <div class="wlink">View Project ↗</div>
+        </div>
+      </a>
+
+      <!-- 4 · Colour Grade · film · s7 -->
+      <a href="https://www.instagram.com/p/DXypr6Qubgi/" target="_blank" class="wc s7" data-cat="film">
+        <div class="wthumb">
+          <div class="w-rarity-bar rb-red"></div>
+          <div class="w-badge">FILM / EDIT</div>
+          <img src="https://drive.google.com/thumbnail?id=1SkN8QnqwLltp55bQE6zSC3VTP8S2iDJf&sz=w1200"
+               alt="Cinematic Colour Grade" loading="lazy" onload="this.classList.add('loaded')" onerror="this.style.display='none'">
+          <div class="wthumb-fallback"><div class="wthumb-fallback-icon">▶</div><div class="wthumb-fallback-name">CINEMATIC COLOUR GRADE</div></div>
+          <div class="w-overlay"><div class="w-play">▶</div></div>
+        </div>
+        <div class="wmeta">
+          <div class="wcat">◆ EPIC · FILM / EDIT</div>
+          <div class="wname">Cinematic Colour Grade — Short Form</div>
+          <div class="wlink">View Project ↗</div>
+        </div>
+      </a>
+
+      <!-- 5 · Cinnamon Girl · fitness · s6 -->
+      <a href="https://www.instagram.com/p/DVLh7NIjE-B/" target="_blank" class="wc s6" data-cat="fitness">
+        <div class="wthumb">
+          <div class="w-rarity-bar rb-red"></div>
+          <div class="w-badge">FITNESS</div>
+          <img src="https://drive.google.com/thumbnail?id=1AlNciblYjSXm4BA-zzGvt5nf_x6yiIZA&sz=w800"
+               alt="Cinnamon Girl Cinematic Edit" loading="lazy" onload="this.classList.add('loaded')" onerror="this.style.display='none'">
+          <div class="wthumb-fallback"><div class="wthumb-fallback-icon">▶</div><div class="wthumb-fallback-name">CINNAMON GIRL EDIT</div></div>
+          <div class="w-overlay"><div class="w-play">▶</div></div>
+        </div>
+        <div class="wmeta">
+          <div class="wcat">◆ EPIC · FITNESS</div>
+          <div class="wname">Cinnamon Girl — Cinematic Edit</div>
+          <div class="wlink">View Project ↗</div>
+        </div>
+      </a>
+
+      <!-- 6 · Decathlon · brand · s6 -->
+      <a href="https://www.instagram.com/reel/DUkcD7_D5y4/" target="_blank" class="wc s6" data-cat="brand">
+        <div class="wthumb">
+          <div class="w-rarity-bar rb-pur"></div>
+          <div class="w-badge">BRAND / CONTENT</div>
+          <img src="https://drive.google.com/thumbnail?id=1B_a3VCS2S9Zw6dLJFzu0NPxXBtaO28sU&sz=w800"
+               alt="Decathlon Product Showcase" loading="lazy" onload="this.classList.add('loaded')" onerror="this.style.display='none'">
+          <div class="wthumb-fallback"><div class="wthumb-fallback-icon">▶</div><div class="wthumb-fallback-name">DECATHLON SHOWCASE</div></div>
+          <div class="w-overlay"><div class="w-play">▶</div></div>
+        </div>
+        <div class="wmeta">
+          <div class="wcat">◆ RARE · BRAND / CONTENT</div>
+          <div class="wname">Product Showcase with Decathlon</div>
+          <div class="wlink">View Project ↗</div>
+        </div>
+      </a>
+
+      <!-- 7 · Kala Bhoomi · lifestyle · s6 -->
+      <a href="https://www.instagram.com/p/Co9r9ZkJyNb/" target="_blank" class="wc s6" data-cat="lifestyle">
+        <div class="wthumb">
+          <div class="w-rarity-bar rb-blue"></div>
+          <div class="w-badge">LIFESTYLE / TRAVEL</div>
+          <img src="https://drive.google.com/thumbnail?id=1jPUDh4vJJOS4XRMHWVdjL6SIFXuooZhq&sz=w800"
+               alt="Museum Cinematic Pan Shots" loading="lazy" onload="this.classList.add('loaded')" onerror="this.style.display='none'">
+          <div class="wthumb-fallback"><div class="wthumb-fallback-icon">▶</div><div class="wthumb-fallback-name">MUSEUM CINEMATIC PANS</div></div>
+          <div class="w-overlay"><div class="w-play">▶</div></div>
+        </div>
+        <div class="wmeta">
+          <div class="wcat">◆ UNCOMMON · LIFESTYLE / TRAVEL</div>
+          <div class="wname">Museum Cinematic Pan Shots — Kala Bhoomi</div>
+          <div class="wlink">View Project ↗</div>
+        </div>
+      </a>
+
+      <!-- 8 · only1 (latest reel) · film · s6 -->
+      <a href="https://www.instagram.com/tezzzzzzzzzzzzzz/reel/DXJvDDijrs4/" target="_blank" class="wc s6" data-cat="film">
+        <div class="wthumb">
+          <div class="w-rarity-bar rb-red"></div>
+          <div class="w-badge">LATEST REEL</div>
+          <img src="https://drive.google.com/thumbnail?id=19u7EiJbUyape5nGd8gWToid3VR_KynBt&sz=w800"
+               alt="only1 — Latest Reel" loading="lazy" onload="this.classList.add('loaded')" onerror="this.style.display='none'">
+          <div class="wthumb-fallback"><div class="wthumb-fallback-icon">▶</div><div class="wthumb-fallback-name">ONLY1 — LATEST REEL</div></div>
+          <div class="w-overlay"><div class="w-play">▶</div></div>
+        </div>
+        <div class="wmeta">
+          <div class="wcat">◆ EPIC · FILM / REELS</div>
+          <div class="wname">only1 — Latest Reel</div>
+          <div class="wlink">View Project ↗</div>
+        </div>
+      </a>
+
+    </div><!-- /work-grid -->
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section class="services-bg" id="services">
+  <div class="sec-wrap">
+    <div class="sec-eye">SPELLBOOK</div>
+    <h2 class="sec-ttl">SERVICES</h2>
+    <div class="spell-grid">
+      <div class="spell reveal"><div class="sp-lvl">LVL 1</div><span class="sp-icon">✂️</span><div class="sp-nm">VIDEO EDITING</div><div class="sp-desc">Reels, short-form, long-form cuts. Colour grading, transitions, sound design — built for the scroll.</div></div>
+      <div class="spell reveal"><div class="sp-lvl">LVL 2</div><span class="sp-icon">◈</span><div class="sp-nm">CREATIVE DIRECTION</div><div class="sp-desc">Shot lists, moodboards, visual concepts. I shape the story before the camera rolls.</div></div>
+      <div class="spell reveal"><div class="sp-lvl">LVL 3</div><span class="sp-icon">◉</span><div class="sp-nm">CONTENT CREATION</div><div class="sp-desc">Full-cycle content for fitness, lifestyle, and D2C brands — idea to finished deliverable.</div></div>
+      <div class="spell reveal"><div class="sp-lvl">LVL 4</div><span class="sp-icon">⊹</span><div class="sp-nm">BRAND COLLABS</div><div class="sp-desc">Paid and barter partnerships. Instagram-native content that performs, not just looks good.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about" style="background:var(--ember2);border-top:2px solid var(--border)">
+  <div class="sec-wrap">
+    <div class="about-grid">
+      <div class="reveal">
+        <div class="sec-eye">ABOUT</div>
+        <h2 class="about-title">BLR, INDIA.<br/>FRAME&#8209;OBSESSED.</h2>
+        <p class="about-body">I'm Tez — editor, director, runner, and chronic overthinker of shot compositions. I make content that feels like it was meant to be watched, not just scrolled past. Fitness, lifestyle, travel, fashion — if there's a story, I'll find the cut.</p>
+        <p class="about-body">Based in Bangalore, India. Always training, always shooting.</p>
+        <div class="about-tags">
+          <span class="atag">Premiere Pro</span><span class="atag">DaVinci Resolve</span>
+          <span class="atag">CapCut</span><span class="atag">Short-Form</span>
+          <span class="atag">Colour Grading</span><span class="atag">Instagram Reels</span>
+          <span class="atag">Fitness</span><span class="atag">Lifestyle</span><span class="atag">Travel</span>
+        </div>
+      </div>
+      <div class="about-stats reveal">
+        <div class="a-stat"><div class="a-stat-n">1.5<span>M</span></div><div class="a-stat-l">Total Views</div></div>
+        <div class="a-stat"><div class="a-stat-n">600<span>K</span></div><div class="a-stat-l">Peak Single Reel</div></div>
+        <div class="a-stat"><div class="a-stat-n">900<span>+</span></div><div class="a-stat-l">Followers</div></div>
+        <div class="a-stat"><div class="a-stat-n">5<span>+</span></div><div class="a-stat-l">Brand Collabs</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COLLABS -->
+<div class="collab-sec">
+  <div class="collab-lbl">Brands &amp; Collaborations</div>
+  <div class="brand-row">
+    <div class="brand-pill">Chkokko</div>
+    <div class="brand-pill">Decathlon</div>
+    <div class="brand-pill">Maga Retail</div>
+    <div class="brand-pill">Sockscarving</div>
+    <div class="brand-pill">Cult</div>
+  </div>
+</div>
+
+<!-- CONTACT -->
+<section id="contact" style="background:var(--void);border-top:2px solid var(--border)">
+  <div class="contact-wrap reveal">
+    <div class="sec-eye" style="justify-content:center;text-align:center;margin-bottom:16px">SEND A MESSAGE</div>
+    <h2 class="contact-big">LET'S<br/>MAKE<br/><span>SOMETHING.</span></h2>
+    <p class="contact-sub">Got a brand, a project, or just a mood board? Slide in — I'm always down for a good collab.</p>
+    <div class="contact-btns">
+      <a class="c-btn primary" href="mailto:tejeswar29.dora@email.com">✉ EMAIL ME ↗</a>
+      <a class="c-btn ghost"   href="https://instagram.com/tezzzzzzzzzzzzzz" target="_blank">📸 INSTAGRAM</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span class="f-logo">TEZZ</span>
+  <span class="f-right">© 2026 — BLR, INDIA &nbsp;·&nbsp; VIDEO EDITOR / CONTENT CREATOR</span>
+</footer>
+
+</div><!-- /app -->
+
+<!-- AI CHAT -->
+<button id="chat-toggle" onclick="toggleChat()">🗡 TEZZ AI</button>
+<div id="chat-panel">
+  <div class="ch-head">
+    <div style="display:flex;align-items:center">
+      <div class="ch-avatar">🤖</div>
+      <div><div class="ch-title">TEZZ AI</div><div class="ch-sub">ask about the work, collabs, gear</div></div>
+    </div>
+    <button class="ch-x" onclick="toggleChat()">×</button>
+  </div>
+  <div class="ch-msgs" id="chatMsgs">
+    <div class="msg ai">yo — what do you want to know about the work?</div>
+  </div>
+  <div class="ch-input-row">
+    <input class="ch-in" id="chatIn" type="text" placeholder="What's your editing style..." onkeydown="if(event.key==='Enter')sendMsg()"/>
+    <button class="ch-go" id="chatGo" onclick="sendMsg()">▸ GO</button>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="overlay" id="overlay" onclick="closeModal(event)">
+  <div class="modal">
+    <button class="modal-x" onclick="closeModal(null,true)">✕</button>
+    <div class="modal-vid" id="modalVid"></div>
+    <div class="modal-body">
+      <div class="modal-title" id="modalTitle"></div>
+      <div class="modal-txt"   id="modalTxt"></div>
+      <a class="modal-link" id="modalHref" href="#" target="_blank">▸ WATCH ON INSTAGRAM</a>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── BOOT ── */
+const BOOT_MSGS=[
+  "INITIALIZING WORLD ENGINE...","MOUNTING FILM ARCHIVE [1.5M VIEWS]...",
+  "CALIBRATING AESTHETIC [A24 MODE]...","LOADING BLR, INDIA MAP DATA...",
+  "AI COMPANION ONLINE...","DRAWING PIXEL LANDSCAPE...","WORLD IS READY."
+];
+async function runBoot(){
+  const log=document.getElementById('bootLog'),fill=document.getElementById('bootFill'),prompt=document.getElementById('bootPrompt');
+  for(let i=0;i<BOOT_MSGS.length;i++){
+    await sleep(260+Math.random()*160);
+    const ln=document.createElement('div');
+    ln.className='boot-log-line'+(i<BOOT_MSGS.length-1?' ok':'');
+    ln.textContent='> '+BOOT_MSGS[i];
+    log.appendChild(ln);
+    fill.style.width=((i+1)/BOOT_MSGS.length*100)+'%';
+  }
+  await sleep(260);prompt.classList.add('show');
+  document.addEventListener('keydown',enterWorld,{once:true});
+  document.addEventListener('click',enterWorld,{once:true});
+}
+function enterWorld(){
+  const boot=document.getElementById('boot');
+  boot.classList.add('fade');
+  setTimeout(()=>{
+    boot.style.display='none';
+    document.getElementById('app').style.display='block';
+    spawnFireflies(); initReveal();
+  },800);
+}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+
+/* ── FIREFLIES ── */
+function spawnFireflies(){
+  const wrap=document.getElementById('fireflies');
+  for(let i=0;i<16;i++){
+    const f=document.createElement('div'); f.className='firefly';
+    f.style.cssText=`left:${8+Math.random()*84}%;bottom:${18+Math.random()*55}%;--dur:${3+Math.random()*4}s;--del:${Math.random()*5}s;--dx:${(Math.random()-.5)*60}px;--dy:${-12-Math.random()*50}px;`;
+    wrap.appendChild(f);
+  }
+}
+
+/* ── FILTERS ── */
+function filterWork(btn,cat){
+  document.querySelectorAll('.f-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.wc').forEach(c=>{
+    c.style.display=(cat==='all'||c.dataset.cat===cat)?'':'none';
+  });
+  const mapCC={all:0,fitness:1,brand:2,film:3,lifestyle:4};
+  document.querySelectorAll('.class-card').forEach(c=>c.classList.remove('active'));
+  const idx=mapCC[cat];
+  if(idx!==undefined) document.querySelectorAll('.class-card')[idx]?.classList.add('active');
+}
+function setClassFilter(cat,el){
+  document.querySelectorAll('.class-card').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  const mapF={all:0,fitness:1,brand:2,film:3,lifestyle:4};
+  document.querySelectorAll('.f-btn').forEach((b,i)=>b.classList.toggle('active',i===mapF[cat]));
+  document.querySelectorAll('.wc').forEach(c=>{
+    c.style.display=(cat==='all'||c.dataset.cat===cat)?'':'none';
+  });
+  document.getElementById('work').scrollIntoView({behavior:'smooth'});
+}
+
+/* ── AI CHAT ── */
+function toggleChat(){document.getElementById('chat-panel').classList.toggle('open');}
+async function sendMsg(){
+  const inp=document.getElementById('chatIn'),msgs=document.getElementById('chatMsgs'),btn=document.getElementById('chatGo');
+  const txt=inp.value.trim(); if(!txt)return;
+  const uMsg=document.createElement('div'); uMsg.className='msg user'; uMsg.textContent=txt;
+  msgs.appendChild(uMsg); inp.value=''; msgs.scrollTop=msgs.scrollHeight;
+  const typing=document.createElement('div'); typing.className='msg typing'; typing.textContent='...';
+  msgs.appendChild(typing); msgs.scrollTop=msgs.scrollHeight; btn.disabled=true;
+  try{
+    const res=await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        model:"claude-sonnet-4-20250514",max_tokens:1000,
+        system:`You are Tezz's AI — voice of Tejas (Tezz), filmmaker, video editor and content creator based in BLR, India. Chill Gen Z tone. Key facts: @tezzzzzzzzzzzzzz on Instagram, 1.5M+ views, 600K peak reel, collabs: Chkokko, Decathlon, Maga Retail, Cult.fit, Sockscarving. Aesthetic: A24, cinematic, back shots, POV — never talks to camera. Tools: Premiere Pro, DaVinci Resolve, CapCut. Run club, races in Bengaluru. Keep replies 2–4 sentences, real not robotic.`,
+        messages:[{role:"user",content:txt}]
+      })
+    });
+    const data=await res.json(); typing.remove();
+    const aMsg=document.createElement('div'); aMsg.className='msg ai';
+    aMsg.textContent=data.content?.[0]?.text||"can't connect rn — dm me on insta";
+    msgs.appendChild(aMsg);
+  }catch(e){
+    typing.remove();
+    const err=document.createElement('div'); err.className='msg ai';
+    err.textContent="api's being weird — slide into the insta dms: @tezzzzzzzzzzzzzz";
+    msgs.appendChild(err);
+  }
+  btn.disabled=false; msgs.scrollTop=msgs.scrollHeight;
+}
+
+/* ── MODAL ── */
+function closeModal(e,force){
+  if(force||e?.target?.id==='overlay'){
+    document.getElementById('overlay').classList.remove('open');
+    document.getElementById('modalVid').innerHTML='';
+    document.body.style.overflow='';
+  }
+}
+
+/* ── SCROLL REVEAL ── */
+function initReveal(){
+  const obs=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');});
+  },{threshold:0.1});
+  document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+}
+
+window.addEventListener('load',runBoot);
+</script>
+</body>
+</html>
